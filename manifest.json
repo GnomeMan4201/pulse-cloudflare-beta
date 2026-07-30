@@ -1,0 +1,21 @@
+{
+  "name": "Pulse — GitHub Analytics",
+  "short_name": "Pulse",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#182019",
+  "theme_color": "#182019",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

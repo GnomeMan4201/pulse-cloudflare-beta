@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><rect width="80" height="80" fill="#1b2420"/><circle cx="40" cy="40" r="18" fill="none" stroke="#3fbf6b" stroke-width="3"/><circle cx="40" cy="40" r="7" fill="#3fbf6b"/></svg></template>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Pulse" />
+  <meta name="theme-color" content="#182019" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" href="./icon-180.png" />
+  <link rel="icon" href="./icon-192.png" />
+  <style>
+    html, body { margin: 0; height: 100%; overscroll-behavior: none; }
+    ::-webkit-scrollbar { display: none; }
+    @keyframes fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => {}); });
+    }
+  </script>
+</helmet>
+<div style="{{ rootStyle }}">
+
+  <!-- ONBOARDING -->
+  <sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ true }}">
+    <div style="{{ onboardStyle }}">
+      <div style="flex:1"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+        <div style="{{ logoRingStyle }}"><div style="{{ logoDotStyle }}"></div></div>
+        <div style="{{ wordmarkStyle }}">Pulse</div>
+        <div style="{{ taglineStyle }}">A daily briefing on your GitHub projects.</div>
+      </div>
+      <div style="flex:1"></div>
+      <div style="display:flex;flex-direction:column;gap:10px;padding:0 24px 8px">
+        <input value="{{ usernameInput }}" onChange="{{ onUsernameChange }}" placeholder="GitHub username" style="{{ inputStyle }}" />
+        <sc-if value="{{ error }}" hint-placeholder-val="{{ false }}">
+          <div style="{{ errorTextStyle }}">{{ error }}</div>
+        </sc-if>
+        <button onClick="{{ submitUsername }}" style="{{ primaryBtnStyle }}" style-active="{{ primaryBtnActiveStyle }}">{{ submitLabel }}</button>
+        <div style="{{ demoRowStyle }}">
+          <sc-for list="{{ demoUsers }}" as="d" hint-placeholder-count="3">
+            <div onClick="{{ d.pick }}" style="{{ demoChipStyle }}" style-active="{{ demoChipActiveStyle }}">{{ d.name }}</div>
+          </sc-for>
+        </div>
+        <div style="{{ onboardFootStyle }}">No token needed. Public data only, stored on this device.</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- APP -->
+  <sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ appShellStyle }}">
+
+      <div style="{{ headerStyle }}">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="{{ headerDotStyle }}"></div>
+          <div style="{{ headerTitleStyle }}">{{ headerLabel }}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div onClick="{{ refresh }}" style="{{ iconBtnStyle }}" style-active="{{ iconBtnActiveStyle }}">{{ refreshGlyph }}</div>
+          <div onClick="{{ toggleTheme }}" style="{{ iconBtnStyle }}" style-active="{{ iconBtnActiveStyle }}">{{ themeGlyph }}</div>
+        </div>
+      </div>
+      <sc-if value="{{ showStatusBar }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ statusBarStyle }}">{{ statusBarText }}</div>
+      </sc-if>
+
+      <div style="{{ scrollAreaStyle }}">
+
+        <!-- BRIEFING -->
+        <sc-if value="{{ isBriefingTab }}" hint-placeholder-val="{{ true }}">
+          <div style="{{ sectionGapStyle }}">
+            <div>
+              <div style="{{ greetingStyle }}">{{ greeting }}</div>
+              <div style="{{ greetingSubStyle }}">{{ greetingSub }}</div>
+            </div>
+
+            <div style="{{ healthCardStyle }}">
+              <div style="{{ healthRowStyle }}">
+                <div>
+                  <div style="{{ statLabelStyle }}">Overall Health</div>
+                  <div style="{{ healthScoreStyle }}">{{ overallHealth.score }}</div>
+                </div>
+                <div style="{{ healthRingWrapStyle }}"><div style="{{ overallHealth.ringStyle }}"></div></div>
+              </div>
+              <div style="{{ statSubStyle }}">{{ overallHealth.caption }}</div>
+            </div>
+
+            <div>
+              <div style="{{ blockHeaderStyle }}">Today</div>
+              <div style="{{ listCardStyle }}">
+                <sc-for list="{{ todayChanges }}" as="ev" hint-placeholder-count="2">
+                  <div style="{{ ev.rowStyle }}">
+                    <div style="{{ ev.dotStyle }}"></div>
+                    <div style="flex:1;min-width:0">
+                      <div style="{{ activityTitleStyle }}">{{ ev.title }}</div>
+                      <div style="{{ activitySubStyle }}">{{ ev.sub }}</div>
+                      <div style="{{ whyStyle }}">{{ ev.why }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ noTodayChanges }}" hint-placeholder-val="{{ false }}">
+                  <div style="{{ emptyRowStyle }}">No changes across your repositories today.</div>
+                </sc-if>
+              </div>
+            </div>
+
+            <div>
+              <div style="{{ blockHeaderStyle }}">Needs Attention</div>
+              <div style="{{ listCardStyle }}">
+                <sc-for list="{{ needsAttention }}" as="ev" hint-placeholder-count="2">
+                  <div style="{{ ev.rowStyle }}">
+                    <div style="{{ ev.dotStyle }}"></div>
+                    <div style="flex:1;min-width:0">
+                      <div style="{{ activityTitleStyle }}">{{ ev.title }}</div>
+                      <div style="{{ activitySubStyle }}">{{ ev.sub }}</div>
+                      <div style="{{ whyStyle }}">{{ ev.why }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ noNeedsAttention }}" hint-placeholder-val="{{ false }}">
+                  <div style="{{ emptyRowStyle }}">Nothing needs attention right now.</div>
+                </sc-if>
+              </div>
+            </div>
+
+            <div>
+              <div style="{{ blockHeaderStyle }}">Opportunities</div>
+              <div style="{{ listCardStyle }}">
+                <sc-for list="{{ opportunities }}" as="ev" hint-placeholder-count="2">
+                  <div style="{{ ev.rowStyle }}">
+                    <div style="{{ ev.dotStyle }}"></div>
+                    <div style="flex:1;min-width:0">
+                      <div style="{{ activityTitleStyle }}">{{ ev.title }}</div>
+                      <div style="{{ activitySubStyle }}">{{ ev.sub }}</div>
+                      <div style="{{ whyStyle }}">{{ ev.why }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ noOpportunities }}" hint-placeholder-val="{{ false }}">
+                  <div style="{{ emptyRowStyle }}">No standout opportunities detected yet.</div>
+                </sc-if>
+              </div>
+            </div>
+
+            <div>
+              <div style="{{ blockHeaderStyle }}">Top Performing</div>
+              <sc-if value="{{ topRepoCard }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ topRepoCard.open }}" style="{{ topRepoCardStyle }}" style-active="{{ repoRowActiveStyle }}">
+                  <div style="flex:1;min-width:0">
+                    <div style="{{ repoNameStyle }}">{{ topRepoCard.name }}</div>
+                    <div style="{{ repoDescStyle }}">{{ topRepoCard.reason }}</div>
+                    <div style="{{ whyStyle }}">{{ topRepoCard.why }}</div>
+                  </div>
+                  <div style="{{ chevronStyle }}">›</div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- PROJECTS -->
+        <sc-if value="{{ isProjectsTab }}" hint-placeholder-val="{{ false }}">
+          <div style="{{ sectionGapStyle }}">
+            <div style="{{ segmentRowStyle }}">
+              <sc-for list="{{ sortOptions }}" as="opt" hint-placeholder-count="5">
+                <div onClick="{{ opt.pick }}" style="{{ opt.style }}">{{ opt.label }}</div>
+              </sc-for>
+            </div>
+            <div style="{{ listCardStyle }}">
+              <sc-for list="{{ sortedRepos }}" as="r" hint-placeholder-count="6">
+                <div onClick="{{ r.open }}" style="{{ r.rowStyle }}" style-active="{{ repoRowActiveStyle }}">
+                  <div style="flex:1;min-width:0">
+                    <div style="{{ repoNameRowStyle }}">
+                      <div style="{{ repoNameStyle }}">{{ r.name }}</div>
+                      <sc-if value="{{ r.isTop }}" hint-placeholder-val="{{ false }}">
+                        <div style="{{ trendingBadgeStyle }}">Top</div>
+                      </sc-if>
+                    </div>
+                    <div style="{{ repoDescStyle }}">{{ r.description }}</div>
+                    <div style="{{ repoMetaRowStyle }}">
+                      <sc-if value="{{ r.language }}" hint-placeholder-val="{{ false }}">
+                        <div style="{{ repoMetaItemStyle }}"><span style="{{ r.langDotStyle }}"></span>{{ r.language }}</div>
+                      </sc-if>
+                      <div style="{{ repoMetaItemStyle }}">★ {{ r.starsFmt }}</div>
+                      <div style="{{ repoMetaItemStyle }}">⑂ {{ r.forksFmt }}</div>
+                      <div style="{{ repoMetaItemStyle }}">◎ {{ r.issuesFmt }}</div>
+                    </div>
+                  </div>
+                  <div style="{{ chevronStyle }}">›</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ACTIVITY -->
+        <sc-if value="{{ isActivityTab }}" hint-placeholder-val="{{ false }}">
+          <div style="{{ sectionGapStyle }}">
+            <div style="{{ blockHeaderStyle }}">Timeline</div>
+            <div style="{{ listCardStyle }}">
+              <sc-for list="{{ fullActivity }}" as="ev" hint-placeholder-count="8">
+                <div style="{{ ev.rowStyle }}">
+                  <div style="{{ ev.dotStyle }}"></div>
+                  <div style="flex:1;min-width:0">
+                    <div style="{{ activityTitleStyle }}">{{ ev.title }}</div>
+                    <div style="{{ activitySubStyle }}">{{ ev.sub }}</div>
+                  </div>
+                  <div style="{{ activityTimeStyle }}">{{ ev.time }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- GROWTH -->
+        <sc-if value="{{ isGrowthTab }}" hint-placeholder-val="{{ false }}">
+          <div style="{{ sectionGapStyle }}">
+            <div style="{{ segmentRowStyle }}">
+              <sc-for list="{{ rangeOptions }}" as="opt" hint-placeholder-count="5">
+                <div onClick="{{ opt.pick }}" style="{{ opt.style }}">{{ opt.label }}</div>
+              </sc-for>
+            </div>
+            <div style="{{ chipRowStyle }}">
+              <sc-for list="{{ chartRepoOptions }}" as="c" hint-placeholder-count="4">
+                <div onClick="{{ c.pick }}" style="{{ c.style }}">{{ c.label }}</div>
+              </sc-for>
+            </div>
+            <div style="{{ chartCardStyle }}">
+              <sc-if value="{{ chartAvailable }}" hint-placeholder-val="{{ true }}">
+                <div style="{{ chartStatsRowStyle }}">
+                  <div><div style="{{ chartStatValueStyle }}">{{ chartStats.total }}</div><div style="{{ statSubStyle }}">commits</div></div>
+                  <div><div style="{{ chartStatValueStyle }}">{{ chartStats.avg }}</div><div style="{{ statSubStyle }}">avg / week</div></div>
+                  <div><div style="{{ chartStats.deltaStyle }}">{{ chartStats.deltaLabel }}</div><div style="{{ statSubStyle }}">vs prior</div></div>
+                </div>
+                <div style="{{ barsRowStyle }}">
+                  <sc-for list="{{ chartBars }}" as="b" hint-placeholder-count="12">
+                    <div style="{{ b.wrapStyle }}"><div style="{{ b.barStyle }}"></div></div>
+                  </sc-for>
+                </div>
+                <div style="{{ chartFootStyle }}">Weekly commit activity · GitHub Stats API</div>
+              </sc-if>
+<sc-if value="{{ chartUnavailable }}" hint-placeholder-val="{{ false }}">
+                <div style="{{ chartUnavailableStyle }}">Commit stats temporarily unavailable for this selection — GitHub may still be calculating them. Try again shortly.</div>
+              </sc-if>
+            </div>
+            <div style="{{ lockedCardStyle }}">
+              <div style="{{ lockedTitleRowStyle }}"><div style="{{ lockGlyphStyle }}">⚿</div><div style="{{ blockHeaderStyle }}">Traffic Analytics</div></div>
+              <div style="{{ lockedBodyStyle }}">Repository views, unique visitors, clones, unique cloners and referral traffic are not exposed by GitHub's public API — they require an authenticated token on the repository owner's account. This can be added when sign-in is supported.</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- PROFILE -->
+        <sc-if value="{{ isProfileTab }}" hint-placeholder-val="{{ false }}">
+          <div style="{{ sectionGapStyle }}">
+            <div style="{{ profileHeaderStyle }}">
+              <sc-if value="{{ user.avatar_url }}" hint-placeholder-val="{{ false }}">
+                <img src="{{ user.avatar_url }}" style="{{ profileAvatarStyle }}" />
+              </sc-if>
+              <div>
+                <div style="{{ repoNameStyle }}">{{ user.name }}</div>
+                <div style="{{ repoDescStyle }}">@{{ user.login }}</div>
+              </div>
+            </div>
+            <sc-if value="{{ user.bio }}" hint-placeholder-val="{{ false }}">
+              <div style="{{ activitySubStyle }}">{{ user.bio }}</div>
+            </sc-if>
+            <div style="{{ statGrid2Style }}">
+              <div style="{{ gridCellStyle }}"><div style="{{ statLabelStyle }}">Followers</div><div style="{{ gridValueStyle }}">{{ user.followers }}</div></div>
+              <div style="{{ gridCellStyle }}"><div style="{{ statLabelStyle }}">Following</div><div style="{{ gridValueStyle }}">{{ user.following }}</div></div>
+              <div style="{{ gridCellStyle }}"><div style="{{ statLabelStyle }}">Public Repos</div><div style="{{ gridValueStyle }}">{{ user.public_repos }}</div></div>
+              <div style="{{ gridCellStyle }}"><div style="{{ statLabelStyle }}">Total Stars</div><div style="{{ gridValueStyle }}">{{ totalStarsFmt }}</div></div>
+            </div>
+            <a href="{{ user.html_url }}" target="_blank" rel="noreferrer" style="{{ ghLinkStyle }}">View profile on GitHub ↗</a>
+            <div style="{{ blockHeaderStyle }}">About this data</div>
+            <div style="{{ lockedBodyStyle }}">All figures come from GitHub's public REST API for {{ user.login }}. No token is stored or required. Traffic, clone and visitor analytics are unavailable without repository-owner authentication — sign in under the Owner tab to unlock them for your own repos.</div>
+            <div style="{{ exportRowStyle }}">
+              <button onClick="{{ exportJSON }}" style="{{ exportBtnStyle }}">Export JSON</button>
+              <button onClick="{{ exportMarkdown }}" style="{{ exportBtnStyle }}">Export Markdown</button>
+            </div>
+            <button onClick="{{ changeUser }}" style="{{ secondaryBtnStyle }}">Switch account</button>
+          </div>
+        </sc-if>
+
+        <!-- OWNER -->
+        <sc-if value="{{ isOwnerTab }}" hint-placeholder-val="{{ false }}">
+          <div style="{{ sectionGapStyle }}">
+            <sc-if value="{{ ownerNotAuthed }}" hint-placeholder-val="{{ false }}">
+              <div style="{{ ownerSignedOutStyle }}">
+                <div style="{{ ownerHeadStyle }}">Sign in with GitHub</div>
+                <div style="{{ ownerBodyStyle }}">Unlocks traffic, clones, referrers, assigned issues, requested reviews and Actions status — for repositories you explicitly authorize. Read-only. Nothing here affects other people's profiles.</div>
+                <sc-if value="{{ ownerAuthReasonIsExpired }}" hint-placeholder-val="{{ false }}">
+                  <div style="{{ errorTextStyle }}">Your previous session expired. Please sign in again.</div>
+                </sc-if>
+                <div style="{{ ownerPermChipRowStyle }}">
+                  <sc-for list="{{ ownerPermChips }}" as="p" hint-placeholder-count="6">
+                    <div style="{{ p.style }}">{{ p.label }}</div>
+                  </sc-for>
+                </div>
+                <button onClick="{{ signInOwner }}" style="{{ primaryBtnStyle }}" style-active="{{ primaryBtnActiveStyle }}">Sign in with GitHub</button>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ ownerAuthed }}" hint-placeholder-val="{{ false }}">
+              <div style="{{ profileHeaderStyle }}">
+                <sc-if value="{{ ownerProfile.avatar_url }}" hint-placeholder-val="{{ false }}">
+                  <img src="{{ ownerProfile.avatar_url }}" style="{{ profileAvatarStyle }}" />
+                </sc-if>
+                <div style="flex:1">
+                  <div style="{{ repoNameStyle }}">{{ ownerProfile.name }}</div>
+                  <div style="{{ repoDescStyle }}">@{{ ownerProfile.login }} · {{ ownerSyncLabel }}</div>
+                </div>
+                <button onClick="{{ signOutOwner }}" style="{{ secondaryBtnStyle }}">Sign out</button>
+              </div>
+
+              <sc-if value="{{ hasOwnerRepos }}" hint-placeholder-val="{{ false }}">
+                <div>
+                  <div style="{{ blockHeaderStyle }}">Traffic — Authorized Repositories</div>
+                  <div style="{{ segmentRowStyle }}">
+                    <sc-for list="{{ ownerRepoOptions }}" as="opt" hint-placeholder-count="3">
+                      <div onClick="{{ opt.pick }}" style="{{ opt.style }}">{{ opt.label }}</div>
+                    </sc-for>
+                  </div>
+                  <sc-if value="{{ hasTrafficRows }}" hint-placeholder-val="{{ false }}">
+                    <div style="{{ statGrid2Style }}">
+                      <sc-for list="{{ trafficRows }}" as="tr" hint-placeholder-count="4">
+                        <div style="{{ gridCellStyle }}">
+                          <div style="{{ statLabelStyle }}">{{ tr.label }}</div>
+                          <div style="{{ gridValueStyle }}">{{ tr.value }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="{{ chartFootStyle }}">Coverage: last 14 days · GitHub Traffic API</div>
+                  </sc-if>
+                  <sc-if value="{{ hasTopReferrers }}" hint-placeholder-val="{{ false }}">
+                    <div style="{{ blockHeaderStyle }}">Top Referrers</div>
+                    <div style="{{ listCardStyle }}">
+                      <sc-for list="{{ topReferrers }}" as="ref" hint-placeholder-count="3">
+                        <div style="{{ factorRowStyle }}"><div style="{{ activitySubStyle }}">{{ ref.referrer }}</div><div style="{{ factorValueStyle }}">{{ ref.count }}</div></div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ hasPopularPaths }}" hint-placeholder-val="{{ false }}">
+                    <div style="{{ blockHeaderStyle }}">Popular Content</div>
+                    <div style="{{ listCardStyle }}">
+                      <sc-for list="{{ popularPaths }}" as="pp" hint-placeholder-count="3">
+                        <div style="{{ factorRowStyle }}"><div style="{{ activitySubStyle }}">{{ pp.path }}</div><div style="{{ factorValueStyle }}">{{ pp.count }}</div></div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-if>
+              <sc-if value="{{ hasOwnerRepos }}" hint-placeholder-val="{{ true }}">
+              </sc-if>
+
+              <sc-for list="{{ ownerIssueLists }}" as="lst" hint-placeholder-count="3">
+                <div>
+                  <div style="{{ blockHeaderStyle }}">{{ lst.title }}</div>
+                  <div style="{{ listCardStyle }}">
+                    <sc-for list="{{ lst.items }}" as="it" hint-placeholder-count="2">
+                      <a href="{{ it.html_url }}" target="_blank" rel="noreferrer" style="{{ commitRowStyle }}">
+                        <div style="{{ commitMsgStyle }}">{{ it.title }}</div>
+                        <div style="{{ activitySubStyle }}">{{ it.repo }}</div>
+                      </a>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+
+              <sc-if value="{{ hasOwnerActionRuns }}" hint-placeholder-val="{{ false }}">
+                <div>
+                  <div style="{{ blockHeaderStyle }}">Actions Needing Attention</div>
+                  <div style="{{ listCardStyle }}">
+                    <sc-for list="{{ ownerActionRuns }}" as="run" hint-placeholder-count="3">
+                      <a href="{{ run.html_url }}" target="_blank" rel="noreferrer" style="{{ commitRowStyle }}">
+                        <div style="{{ commitMsgStyle }}">{{ run.repo }} — {{ run.name }}</div>
+                        <div style="{{ activitySubStyle }}">{{ run.status }} / {{ run.conclusion }}</div>
+                      </a>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+            </sc-if>
+          </div>
+        </sc-if>
+
+      </div>
+
+      <div style="{{ tabBarStyle }}">
+        <sc-for list="{{ tabItems }}" as="t" hint-placeholder-count="5">
+          <div onClick="{{ t.pick }}" style="{{ t.wrapStyle }}">
+            <div style="{{ t.iconStyle }}">{{ t.glyph }}</div>
+            <div style="{{ t.labelStyle }}">{{ t.label }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- PROJECT DETAIL OVERLAY -->
+      <sc-if value="{{ isRepoDetailOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ overlayStyle }}">
+          <div style="{{ overlayScrollStyle }}">
+            <div style="{{ overlayHeaderStyle }}">
+              <div onClick="{{ closeRepo }}" style="{{ iconBtnStyle }}" style-active="{{ iconBtnActiveStyle }}">‹</div>
+            </div>
+            <div style="{{ detailTitleWrapStyle }}">
+              <div style="{{ detailNameStyle }}">{{ selectedRepoData.name }}</div>
+              <div style="{{ detailOwnerStyle }}">{{ selectedRepoData.full_name }}</div>
+              <div style="{{ repoDescStyle }}">{{ selectedRepoData.description }}</div>
+              <div style="{{ chipRowStyle }}">
+                <sc-for list="{{ selectedRepoData.chips }}" as="c" hint-placeholder-count="3">
+                  <div style="{{ metaChipStyle }}">{{ c }}</div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="{{ statGrid2Style }}">
+              <sc-for list="{{ selectedRepoData.grid }}" as="g" hint-placeholder-count="4">
+                <div style="{{ gridCellStyle }}">
+                  <div style="{{ statLabelStyle }}">{{ g.label }}</div>
+                  <div style="{{ gridValueStyle }}">{{ g.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div>
+              <div style="{{ blockHeaderRowStyle }}">
+                <div style="{{ blockHeaderStyle }}">Health Score</div>
+                <div style="{{ healthScoreSmallStyle }}">{{ selectedRepoData.health.score }}</div>
+              </div>
+              <div style="{{ listCardStyle }}">
+                <sc-for list="{{ selectedRepoData.health.factors }}" as="f" hint-placeholder-count="3">
+                  <div style="{{ factorRowStyle }}">
+                    <div style="{{ activitySubStyle }}">{{ f.label }}</div>
+                    <div style="{{ factorValueStyle }}">{{ f.detail }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div>
+              <div style="{{ blockHeaderStyle }}">Meaningful Trends</div>
+              <div style="{{ listCardStyle }}">
+                <sc-for list="{{ selectedRepoData.trends }}" as="tr" hint-placeholder-count="2">
+                  <div style="{{ ev2RowStyle }}">
+                    <div style="{{ tr.dotStyle }}"></div>
+                    <div style="{{ activitySubStyle }}">{{ tr.text }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="{{ blockHeaderStyle }}">Latest Release</div>
+            <div style="{{ listCardStyle }}">
+              <div style="{{ releaseRowStyle }}">
+                <div style="flex:1;min-width:0">
+                  <div style="{{ repoNameStyle }}">{{ selectedRepoData.latestRelease.tag }}</div>
+                  <div style="{{ repoDescStyle }}">{{ selectedRepoData.latestRelease.date }}</div>
+                </div>
+                <div style="{{ gridValueStyle }}">{{ selectedRepoData.latestRelease.downloads }}</div>
+              </div>
+            </div>
+
+            <div style="{{ blockHeaderStyle }}">Commit Activity</div>
+            <div style="{{ chartCardStyle }}">
+              <div style="{{ barsRowStyle }}">
+                <sc-for list="{{ selectedRepoData.sparkline }}" as="b" hint-placeholder-count="20">
+                  <div style="{{ b.wrapStyle }}"><div style="{{ b.barStyle }}"></div></div>
+                </sc-for>
+              </div>
+              <div style="{{ chartFootStyle }}">Last 52 weeks</div>
+            </div>
+
+            <div style="{{ blockHeaderStyle }}">Recent Commits</div>
+            <div style="{{ listCardStyle }}">
+              <sc-for list="{{ selectedRepoData.commits }}" as="cm" hint-placeholder-count="4">
+                <div style="{{ commitRowStyle }}">
+                  <div style="{{ commitMsgStyle }}">{{ cm.message }}</div>
+                  <div style="{{ activitySubStyle }}">{{ cm.meta }}</div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ selectedRepoData.commitsLoading }}" hint-placeholder-val="{{ false }}">
+                <div style="{{ commitRowStyle }}"><div style="{{ activitySubStyle }}">Loading commits…</div></div>
+              </sc-if>
+            </div>
+
+            <div style="{{ blockHeaderStyle }}">Contributors</div>
+            <div style="{{ contributorRowStyle }}">
+              <sc-for list="{{ selectedRepoData.contributors }}" as="ct" hint-placeholder-count="6">
+                <img src="{{ ct.avatar_url }}" style="{{ contributorAvatarStyle }}" />
+              </sc-for>
+            </div>
+
+            <a href="{{ selectedRepoData.htmlUrl }}" target="_blank" rel="noreferrer" style="{{ ghLinkStyle }}">Open on GitHub ↗</a>
+            <div style="height:8px"></div>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+
+const GH = 'https://api.github.com';
+const LS_KEY = 'pulse_username';
+
+class Component extends DCLogic {
+  state = {
+    dark: true,
+    screen: 'onboarding',
+    usernameInput: 'sindresorhus',
+    username: null,
+    loading: false,
+    error: null,
+    user: null,
+    repos: [],
+    releasesByRepo: {},
+    commitActivityByRepo: {},
+    tab: 'briefing',
+    selectedRepoName: null,
+    detailLoading: false,
+    commitsByRepo: {},
+    contributorsByRepo: {},
+    subscribersByRepo: {},
+    timeRange: '90d',
+    chartRepo: 'all',
+    repoSort: 'trending',
+    lastUpdated: null,
+    stale: false,
+    rateLimitNote: null,
+    refreshing: false,
+    ownerChecked: false,
+    ownerAuthed: false,
+    ownerProfile: null,
+    ownerRepos: [],
+    ownerSelectedRepo: null,
+    ownerTraffic: null,
+    ownerIssuesData: null,
+    ownerActionsData: null,
+    ownerSyncedAt: null,
+    ownerLoading: false,
+    ownerAuthReason: null,
+  };
+
+  async checkOwnerSession() {
+    this.setState({ ownerChecked: false });
+    try {
+      const res = await fetch('/api/me', { credentials: 'include' });
+      if (!res.ok) {
+        let reason = null;
+        try { reason = (await res.json()).reason; } catch (e) {}
+        this.setState({ ownerChecked: true, ownerAuthed: false, ownerAuthReason: reason });
+        return;
+      }
+      const data = await res.json();
+      this.setState({ ownerChecked: true, ownerAuthed: !!data.authenticated, ownerProfile: data.user || null });
+      if (data.authenticated) this.loadOwnerData();
+    } catch (e) {
+      this.setState({ ownerChecked: true, ownerAuthed: false });
+    }
+  }
+
+  async loadOwnerData() {
+    this.setState({ ownerLoading: true });
+    try {
+      const rRes = await fetch('/api/repos', { credentials: 'include' });
+      const rData = rRes.ok ? await rRes.json() : { repos: [] };
+      const repos = rData.repos || [];
+      const iRes = await fetch('/api/owner-issues', { credentials: 'include' });
+      const ownerIssuesData = iRes.ok ? await iRes.json() : null;
+      const aRes = await fetch(`/api/owner-actions?repos=${repos.map((r) => r.full_name).join(',')}`, { credentials: 'include' });
+      const ownerActionsData = aRes.ok ? await aRes.json() : null;
+      this.setState({ ownerRepos: repos, ownerIssuesData, ownerActionsData, ownerLoading: false, ownerSyncedAt: Date.now(), ownerSelectedRepo: repos[0] ? repos[0].full_name : null });
+      if (repos[0]) this.loadOwnerTraffic(repos[0].full_name);
+    } catch (e) {
+      this.setState({ ownerLoading: false });
+    }
+  }
+
+  async loadOwnerTraffic(fullName) {
+    this.setState({ ownerSelectedRepo: fullName, ownerTraffic: null });
+    try {
+      const res = await fetch(`/api/traffic?repo=${encodeURIComponent(fullName)}`, { credentials: 'include' });
+      const data = res.ok ? await res.json() : null;
+      this.setState({ ownerTraffic: data });
+    } catch (e) { this.setState({ ownerTraffic: null }); }
+  }
+
+  signInOwner = () => { window.location.href = '/api/auth/login'; };
+  signOutOwner = async () => {
+    try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch (e) {}
+    try {
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage('purge-legacy-caches');
+    } catch (e) {}
+    this.setState({ ownerAuthed: false, ownerProfile: null, ownerRepos: [], ownerTraffic: null, ownerIssuesData: null, ownerActionsData: null });
+  };
+
+  downloadBlob(filename, content, type) {
+    const blob = new Blob([content], { type });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+
+  exportJSON = () => {
+    const s = this.state;
+    const payload = { generated_at: new Date().toISOString(), source: 'GitHub REST API (public, unauthenticated)', username: s.username, user: s.user, repositories: s.repos };
+    this.downloadBlob(`pulse-${s.username}-evidence.json`, JSON.stringify(payload, null, 2), 'application/json');
+  };
+  exportMarkdown = () => {
+    const s = this.state;
+    const lines = [`# Pulse Evidence Export — ${s.username}`, `Generated ${new Date().toISOString()} · Source: GitHub REST API (public, unauthenticated)`, '', '## Facts', `- Public repos: ${s.user.public_repos}`, `- Followers: ${s.user.followers}`, `- Following: ${s.user.following}`, '', '## Repositories'];
+    (s.repos || []).forEach((r) => lines.push(`- ${r.full_name} — ★${r.stargazers_count} ⑂${r.forks_count} issues+PRs:${r.open_issues_count} fork:${r.fork} archived:${r.archived} template:${r.is_template} pushed:${r.pushed_at}`));
+    this.downloadBlob(`pulse-${s.username}-evidence.md`, lines.join('\n'), 'text/markdown');
+  };
+
+  async fetchJSON(url) {
+    const res = await fetch(url, { headers: { Accept: 'application/vnd.github+json' } });
+    if (res.headers.get('x-ratelimit-remaining') === '0') { const e = new Error('GitHub rate limit hit — try again shortly'); e.rateLimited = true; throw e; }
+    if (res.status === 202) { const e = new Error('pending'); e.pending = true; throw e; }
+    if (res.status === 404) throw new Error('User not found');
+    if (res.status === 403) { const e = new Error('GitHub rate limit hit — try again shortly'); e.rateLimited = true; throw e; }
+    if (!res.ok) throw new Error('GitHub request failed');
+    return res.json();
+  }
+
+  cacheKey(username) { return `pulse_cache_${username.toLowerCase()}`; }
+  saveCache(username, payload) {
+    try { localStorage.setItem(this.cacheKey(username), JSON.stringify({ ...payload, ts: Date.now() })); } catch (e) {}
+  }
+  loadCache(username) {
+    try { const raw = localStorage.getItem(this.cacheKey(username)); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+  }
+
+  onUsernameChange = (e) => this.setState({ usernameInput: e.target.value, error: null });
+  pickDemo = (name) => this.setState({ usernameInput: name });
+  submitUsername = () => this.loadDashboard(this.state.usernameInput.trim());
+  changeUser = () => { try { localStorage.removeItem(LS_KEY); } catch (e) {} this.setState({ screen: 'onboarding', error: null, tab: 'briefing' }); };
+  refresh = () => { if (this.state.username) this.loadDashboard(this.state.username); };
+  toggleTheme = () => this.setState((s) => ({ dark: !s.dark }));
+  setTab = (tab) => this.setState({ tab });
+  setRepoSort = (repoSort) => this.setState({ repoSort });
+  setTimeRange = (timeRange) => this.setState({ timeRange });
+  setChartRepo = (chartRepo) => this.setState({ chartRepo });
+
+  async loadDashboard(username) {
+    if (!username) return;
+    const hadData = this.state.username === username && this.state.user;
+    this.setState({ loading: !hadData, refreshing: !!hadData, error: null, rateLimitNote: null });
+    try {
+      const user = await this.fetchJSON(`${GH}/users/${username}`);
+      const repos = await this.fetchJSON(`${GH}/users/${username}/repos?per_page=100&sort=pushed`);
+      const list = Array.isArray(repos) ? repos : [];
+      const top = [...list].sort((a, b) => b.stargazers_count - a.stargazers_count).slice(0, 6);
+      const commitActivityByRepo = {};
+      const releasesByRepo = {};
+      const subscribersByRepo = {};
+      let pendingCount = 0;
+      await Promise.all(top.map(async (r) => {
+        try { commitActivityByRepo[r.full_name] = await this.fetchJSON(`${GH}/repos/${r.full_name}/stats/commit_activity`); }
+        catch (e) { commitActivityByRepo[r.full_name] = null; if (e.pending) pendingCount++; }
+        try { releasesByRepo[r.full_name] = await this.fetchJSON(`${GH}/repos/${r.full_name}/releases?per_page=10`); }
+        catch (e) { releasesByRepo[r.full_name] = null; }
+        try { const full = await this.fetchJSON(`${GH}/repos/${r.full_name}`); subscribersByRepo[r.full_name] = full.subscribers_count ?? null; }
+        catch (e) { subscribersByRepo[r.full_name] = null; }
+      }));
+      const now = Date.now();
+      try { localStorage.setItem(LS_KEY, username); } catch (e) {}
+      this.saveCache(username, { user, repos: list, commitActivityByRepo, releasesByRepo, subscribersByRepo });
+      this.setState({
+        loading: false, refreshing: false, screen: 'app', username, user, repos: list,
+        commitActivityByRepo, releasesByRepo, subscribersByRepo, tab: this.state.tab === 'briefing' || !hadData ? this.state.tab : this.state.tab,
+        chartRepo: this.state.chartRepo, lastUpdated: now, stale: false,
+        rateLimitNote: pendingCount > 0 ? 'Some commit stats are still being calculated by GitHub — retrying shortly.' : null,
+      });
+      if (pendingCount > 0) setTimeout(() => this.retryPendingStats(username, top), 3000);
+    } catch (e) {
+      const cache = this.loadCache(username);
+      if (cache) {
+        this.setState({
+          loading: false, refreshing: false, screen: 'app', username, user: cache.user, repos: cache.repos,
+          commitActivityByRepo: cache.commitActivityByRepo || {}, releasesByRepo: cache.releasesByRepo || {},
+          subscribersByRepo: cache.subscribersByRepo || {}, tab: 'briefing', lastUpdated: cache.ts, stale: true,
+          rateLimitNote: e.rateLimited ? 'GitHub rate limit hit — showing cached data.' : 'Network error — showing cached data.',
+        });
+      } else {
+        this.setState({ loading: false, refreshing: false, error: e.message || 'Failed to load' });
+      }
+    }
+  }
+
+  async retryPendingStats(username, top) {
+    if (this.state.username !== username) return;
+    const commitActivityByRepo = { ...this.state.commitActivityByRepo };
+    let stillPending = 0;
+    await Promise.all(top.map(async (r) => {
+      if (commitActivityByRepo[r.full_name] !== null) return;
+      try { commitActivityByRepo[r.full_name] = await this.fetchJSON(`${GH}/repos/${r.full_name}/stats/commit_activity`); }
+      catch (e) { if (e.pending) stillPending++; }
+    }));
+    this.setState({ commitActivityByRepo, rateLimitNote: stillPending > 0 ? 'Some commit stats are still being calculated by GitHub.' : null });
+  }
+
+  openRepo = (fullName) => {
+    this.setState({ selectedRepoName: fullName, tab: 'projects' });
+    if (!this.state.commitsByRepo[fullName]) {
+      this.setState({ detailLoading: true });
+      this.fetchJSON(`${GH}/repos/${fullName}/commits?per_page=5`).then((commits) => {
+        this.setState((s) => ({ commitsByRepo: { ...s.commitsByRepo, [fullName]: commits }, detailLoading: false }));
+      }).catch(() => this.setState({ detailLoading: false }));
+    }
+    if (!this.state.contributorsByRepo[fullName]) {
+      this.fetchJSON(`${GH}/repos/${fullName}/contributors?per_page=8`).then((contributors) => {
+        this.setState((s) => ({ contributorsByRepo: { ...s.contributorsByRepo, [fullName]: Array.isArray(contributors) ? contributors : [] } }));
+      }).catch(() => {});
+    }
+  };
+  closeRepo = () => this.setState({ selectedRepoName: null });
+
+  fmt(n) {
+    if (n == null || isNaN(n)) return '0';
+    if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+    return String(n);
+  }
+
+  timeAgo(iso) {
+    if (!iso) return '';
+    const d = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (d < 3600) return Math.max(1, Math.floor(d / 60)) + 'm ago';
+    if (d < 86400) return Math.floor(d / 3600) + 'h ago';
+    if (d < 86400 * 30) return Math.floor(d / 86400) + 'd ago';
+    if (d < 86400 * 365) return Math.floor(d / (86400 * 30)) + 'mo ago';
+    return Math.floor(d / (86400 * 365)) + 'y ago';
+  }
+
+  daysSince(iso) { return (Date.now() - new Date(iso).getTime()) / 86400000; }
+
+  recentCommitSum(commitActivityByRepo, fullName, weeks) {
+    const ca = commitActivityByRepo[fullName];
+    if (!Array.isArray(ca) || !ca.length) return null;
+    return ca.slice(-weeks).reduce((a, w) => a + (w.total || 0), 0);
+  }
+
+  trendScore(r, commitActivityByRepo) {
+    const recent = this.recentCommitSum(commitActivityByRepo, r.full_name, 4) || 0;
+    const days = this.daysSince(r.pushed_at);
+    const recency = days < 7 ? 60 : days < 30 ? 25 : days < 90 ? 8 : 0;
+    return r.stargazers_count * 1 + r.forks_count * 2 + recent * 6 + recency;
+  }
+
+  healthScore(r, commitActivityByRepo, releasesByRepo) {
+    const days = this.daysSince(r.pushed_at);
+    const factors = [];
+    let score = 40;
+    let recencyPts = 0;
+    if (days < 7) recencyPts = 30; else if (days < 30) recencyPts = 20; else if (days < 90) recencyPts = 8;
+    score += recencyPts;
+    factors.push({ label: 'Recent activity', detail: `pushed ${Math.floor(days)}d ago → +${recencyPts}` });
+
+    const stars = Math.max(r.stargazers_count, 1);
+    const ratio = r.open_issues_count / stars;
+    let issuePts = 10;
+    if (r.stargazers_count > 0) { issuePts = ratio < 0.05 ? 20 : ratio < 0.15 ? 10 : 0; }
+    score += issuePts;
+    factors.push({ label: 'Issue ratio', detail: `${r.open_issues_count} open / ${r.stargazers_count} stars → +${issuePts}` });
+
+    const rels = releasesByRepo[r.full_name];
+    const releaseDataAvailable = Array.isArray(rels);
+    const hasRelease = releaseDataAvailable && rels.length > 0;
+    const releasePts = hasRelease ? 15 : 0;
+    score += releasePts;
+    factors.push({ label: 'Release cadence', detail: !releaseDataAvailable ? 'release data unavailable → +0 (neutral)' : hasRelease ? `${rels.length} release(s) → +${releasePts}` : 'no releases found → +0' });
+
+    return { score: Math.max(0, Math.min(100, Math.round(score))), factors };
+  }
+
+  langColors() {
+    return { JavaScript: '#e8c547', TypeScript: '#5b9dd9', Python: '#6fae5e', Go: '#6fc7d9', Rust: '#e0834f', Ruby: '#d9787a', Swift: '#f0a860', HTML: '#e0834f', CSS: '#7b9cd9', Shell: '#8fbf8f', 'C++': '#d97a9c', Java: '#d99a4f' };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const dark = s.dark;
+    const ink = dark ? 'oklch(0.97 0.004 250)' : 'oklch(0.16 0.01 250)';
+    const inkMuted = dark ? 'oklch(0.68 0.015 250)' : 'oklch(0.48 0.015 250)';
+    const inkFaint = dark ? 'oklch(0.5 0.015 250)' : 'oklch(0.62 0.015 250)';
+    const bg = dark ? 'oklch(0.17 0.008 250)' : 'oklch(0.97 0.004 250)';
+    const cardBg = dark ? 'oklch(0.225 0.01 250)' : 'oklch(1 0 0)';
+    const cardBg2 = dark ? 'oklch(0.27 0.012 250)' : 'oklch(0.99 0.003 250)';
+    const border = dark ? 'oklch(0.32 0.012 250)' : 'oklch(0.9 0.006 250)';
+    const accent = 'oklch(0.72 0.19 145)';
+    const accentSoft = dark ? 'oklch(0.34 0.07 145)' : 'oklch(0.93 0.06 145)';
+    const info = 'oklch(0.68 0.14 250)';
+    const amber = 'oklch(0.78 0.14 80)';
+    const danger = 'oklch(0.65 0.18 30)';
+    const font = "-apple-system, 'SF Pro Text', system-ui, sans-serif";
+    const safeTop = 'env(safe-area-inset-top, 0px)';
+    const safeBottom = 'env(safe-area-inset-bottom, 0px)';
+
+    const rootStyle = { position: 'fixed', inset: 0, width: '100vw', height: '100dvh', background: bg, fontFamily: font, overflow: 'hidden', color: ink };
+
+    const onboardStyle = { height: '100%', display: 'flex', flexDirection: 'column', background: bg, paddingTop: safeTop, paddingBottom: safeBottom, boxSizing: 'border-box' };
+    const logoRingStyle = { width: 64, height: 64, borderRadius: 999, background: accentSoft, display: 'flex', alignItems: 'center', justifyContent: 'center' };
+    const logoDotStyle = { width: 22, height: 22, borderRadius: 999, background: accent };
+    const wordmarkStyle = { fontSize: 30, fontWeight: 700, color: ink, letterSpacing: -0.5 };
+    const taglineStyle = { fontSize: 14, color: inkMuted, textAlign: 'center', maxWidth: 260 };
+    const inputStyle = { height: 50, borderRadius: 14, border: `1px solid ${border}`, background: cardBg, color: ink, fontSize: 16, padding: '0 16px', outline: 'none', fontFamily: font, boxSizing: 'border-box' };
+    const errorTextStyle = { color: danger, fontSize: 13, padding: '0 2px' };
+    const primaryBtnStyle = { height: 50, borderRadius: 14, background: accent, color: '#06210f', fontSize: 16, fontWeight: 650, border: 'none', fontFamily: font, cursor: 'pointer' };
+    const primaryBtnActiveStyle = { ...primaryBtnStyle, transform: 'scale(0.98)', opacity: 0.9 };
+    const secondaryBtnStyle = { height: 46, borderRadius: 14, background: 'transparent', color: ink, fontSize: 14.5, fontWeight: 600, border: `1px solid ${border}`, fontFamily: font, cursor: 'pointer' };
+    const demoRowStyle = { display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', paddingTop: 4 };
+    const demoChipStyle = { fontSize: 12.5, color: inkMuted, padding: '6px 12px', borderRadius: 999, border: `1px solid ${border}`, cursor: 'pointer' };
+    const demoChipActiveStyle = { ...demoChipStyle, background: cardBg };
+    const onboardFootStyle = { fontSize: 11.5, color: inkFaint, textAlign: 'center', paddingTop: 6 };
+
+    const appShellStyle = { height: '100%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' };
+    const headerStyle = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: `calc(${safeTop} + 10px) 18px 12px` };
+    const headerDotStyle = { width: 9, height: 9, borderRadius: 999, background: accent, boxShadow: `0 0 0 4px ${accentSoft}` };
+    const headerTitleStyle = { fontSize: 17, fontWeight: 700, color: ink, letterSpacing: -0.3 };
+    const iconBtnStyle = { width: 36, height: 36, borderRadius: 999, background: cardBg, border: `1px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, color: inkMuted, cursor: 'pointer' };
+    const iconBtnActiveStyle = { ...iconBtnStyle, transform: 'scale(0.92)' };
+
+    const scrollAreaStyle = { flex: 1, overflow: 'auto', padding: '4px 18px 14px' };
+    const sectionGapStyle = { display: 'flex', flexDirection: 'column', gap: 20 };
+
+    const tabLabels = { briefing: 'Briefing', projects: 'Projects', activity: 'Activity', growth: 'Growth', profile: 'Profile' };
+    const headerLabel = tabLabels[s.tab] || 'Pulse';
+
+    const user = s.user || {};
+    const repos = s.repos || [];
+    const commitActivityByRepo = s.commitActivityByRepo || {};
+    const releasesByRepo = s.releasesByRepo || {};
+    const totalStars = repos.reduce((a, r) => a + r.stargazers_count, 0);
+
+    const hour = new Date().getHours();
+    const greetTime = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+    const greeting = `${greetTime}${user.name ? ', ' + user.name.split(' ')[0] : ''}`;
+    const greetingStyle = { fontSize: 24, fontWeight: 700, color: ink, letterSpacing: -0.4 };
+    const greetingSubStyle = { fontSize: 13.5, color: inkMuted, marginTop: 2 };
+    const greetingSub = `${repos.length} repositories tracked`;
+
+    const statLabelStyle = { fontSize: 12, color: inkMuted, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.4 };
+    const statSubStyle = { fontSize: 11.5, color: inkFaint, marginTop: 2 };
+
+    const topRepos = [...repos].sort((a, b) => b.stargazers_count - a.stargazers_count).slice(0, 6);
+    const healthScored = topRepos.map((r) => ({ r, h: this.healthScore(r, commitActivityByRepo, releasesByRepo) }));
+    const avgHealth = healthScored.length ? Math.round(healthScored.reduce((a, x) => a + x.h.score, 0) / healthScored.length) : 0;
+    const healthColor = avgHealth >= 70 ? accent : avgHealth >= 45 ? amber : danger;
+    const overallHealth = {
+      score: healthScored.length ? String(avgHealth) : '—',
+      caption: healthScored.length ? `Averaged across your ${healthScored.length} most-starred repositories, based on recent activity, issue ratio and release cadence.` : 'No repository data available.',
+      ringStyle: { width: 44, height: 44, borderRadius: 999, background: `conic-gradient(${healthColor} ${avgHealth * 3.6}deg, ${border} 0deg)` },
+    };
+    const healthCardStyle = { background: cardBg, border: `1px solid ${border}`, borderRadius: 18, padding: 16, display: 'flex', flexDirection: 'column', gap: 6 };
+    const healthRowStyle = { display: 'flex', alignItems: 'center', justifyContent: 'space-between' };
+    const healthScoreStyle = { fontSize: 30, fontWeight: 700, color: ink, letterSpacing: -0.5 };
+    const healthRingWrapStyle = { display: 'flex' };
+    const healthScoreSmallStyle = { fontSize: 15, fontWeight: 700, color: healthColor };
+
+    const rowBase = { display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderBottom: `0.5px solid ${border}` };
+    const ev2RowStyle = { display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 16px', borderBottom: `0.5px solid ${border}` };
+    const dotFor = (color) => ({ width: 7, height: 7, borderRadius: 999, background: color, flexShrink: 0, marginTop: 6 });
+    const activityTitleStyle = { fontSize: 14, color: ink, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' };
+    const activitySubStyle = { fontSize: 12.5, color: inkMuted, marginTop: 1 };
+    const activityTimeStyle = { fontSize: 11.5, color: inkFaint, flexShrink: 0 };
+    const emptyRowStyle = { padding: '16px', fontSize: 13, color: inkFaint };
+
+    const whyStyle = { fontSize: 11, color: inkFaint, marginTop: 3, fontStyle: 'italic' };
+
+    const todayChangesRaw = repos.filter((r) => this.daysSince(r.pushed_at) < 1);
+    const todayChanges = todayChangesRaw.slice(0, 5).map((r) => ({
+      title: `${r.name} updated`, sub: r.description || 'Repository pushed today',
+      why: `Why: pushed_at = ${r.pushed_at}, within 24h of now.`, rowStyle: rowBase, dotStyle: dotFor(info),
+    }));
+    const noTodayChanges = todayChanges.length === 0;
+
+    const attentionItems = [];
+    topRepos.forEach((r) => {
+      const days = this.daysSince(r.pushed_at);
+      if (days > 14 && r.stargazers_count > 0) attentionItems.push({ title: `${r.name} has had no activity in ${Math.floor(days)} days`, sub: 'No commits, releases or pushes recorded recently.', why: `Why: pushed_at was ${Math.floor(days)} days ago; rule fires when >14 days and stars > 0.`, dotStyle: dotFor(amber) });
+      const ratio = r.open_issues_count / Math.max(r.stargazers_count, 1);
+      if (r.open_issues_count >= 5 && ratio > 0.15) attentionItems.push({ title: `${r.name} has an elevated issue count`, sub: `${r.open_issues_count} open issues + PRs relative to ${r.stargazers_count} stars.`, why: `Why: open_issues_count (${r.open_issues_count}, includes PRs) ÷ stars (${r.stargazers_count}) = ${ratio.toFixed(2)} > 0.15 threshold, with ≥5 open.`, dotStyle: dotFor(danger) });
+      const rels = releasesByRepo[r.full_name];
+      if (r.stargazers_count > 10 && Array.isArray(rels) && rels.length === 0) attentionItems.push({ title: `${r.name} has stars but no releases`, sub: 'Consider publishing a release to track adoption.', why: `Why: stargazers_count (${r.stargazers_count}) > 10 and 0 releases returned by the Releases API.`, dotStyle: dotFor(amber) });
+    });
+    const needsAttention = attentionItems.slice(0, 4).map((x) => ({ ...x, rowStyle: rowBase }));
+    const noNeedsAttention = needsAttention.length === 0;
+
+    const opportunityItems = [];
+    const gaining = healthScored.map(({ r }) => {
+      const recent = this.recentCommitSum(commitActivityByRepo, r.full_name, 4);
+      const prior = commitActivityByRepo[r.full_name];
+      const priorSum = Array.isArray(prior) ? prior.slice(-8, -4).reduce((a, w) => a + (w.total || 0), 0) : null;
+      return { r, recent, priorSum };
+    }).filter((x) => x.recent != null && x.priorSum != null && x.recent > x.priorSum && x.recent > 0)
+      .sort((a, b) => (b.recent - b.priorSum) - (a.recent - a.priorSum))[0];
+    if (gaining) opportunityItems.push({ title: `${gaining.r.name} is gaining momentum`, sub: `${gaining.recent} commits in the last 4 weeks vs ${gaining.priorSum} the 4 weeks before.`, why: 'Why: sum of weekly commit counts (GitHub commit_activity stats) for the last 4 weeks vs the 4 weeks prior — this reflects commit activity, not stars.', dotStyle: dotFor(accent) });
+    let topDownloadRepo = null, topDownloadRel = null, topDownloadCount = -1;
+    topRepos.forEach((r) => {
+      (releasesByRepo[r.full_name] || []).forEach((rel) => {
+        const dl = (rel.assets || []).reduce((a, x) => a + (x.download_count || 0), 0);
+        if (dl > topDownloadCount) { topDownloadCount = dl; topDownloadRel = rel; topDownloadRepo = r; }
+      });
+    });
+    if (topDownloadRepo && topDownloadCount > 0) opportunityItems.push({ title: `${topDownloadRel.tag_name} is your most-downloaded release`, sub: `${this.fmt(topDownloadCount)} downloads on ${topDownloadRepo.name}.`, why: 'Why: sum of asset.download_count across all assets, highest among fetched releases for your top 6 repos.', dotStyle: dotFor(info) });
+    const newIssueRepo = topRepos.find((r) => r.open_issues_count === 1);
+    if (newIssueRepo) opportunityItems.push({ title: `${newIssueRepo.name} has exactly one open issue`, sub: 'Might be quick to review and close.', why: 'Why: open_issues_count field equals 1 (this field includes open PRs).', dotStyle: dotFor(info) });
+    const opportunities = opportunityItems.slice(0, 4).map((x) => ({ ...x, rowStyle: rowBase }));
+    const noOpportunities = opportunities.length === 0;
+
+    const topStarRepo = [...repos].sort((a, b) => b.stargazers_count - a.stargazers_count)[0];
+    const topRepoCard = topStarRepo ? {
+      name: topStarRepo.name,
+      reason: `${this.fmt(topStarRepo.stargazers_count)} stars, ${this.fmt(topStarRepo.forks_count)} forks — your highest-starred repository.`,
+      why: `Why: highest stargazers_count (${topStarRepo.stargazers_count}) among all fetched repositories — a current snapshot, not a growth claim.`,
+      open: () => this.openRepo(topStarRepo.full_name),
+    } : null;
+    const topRepoCardStyle = { display: 'flex', alignItems: 'center', gap: 12, background: cardBg, border: `1px solid ${border}`, borderRadius: 18, padding: '14px 16px', cursor: 'pointer' };
+    const clickableRowStyle = { ...rowBase, cursor: 'pointer' };
+
+    const blockHeaderRowStyle = { display: 'flex', alignItems: 'center', justifyContent: 'space-between' };
+    const blockHeaderStyle = { fontSize: 15, fontWeight: 700, color: ink, letterSpacing: -0.2, marginBottom: 8 };
+    const listCardStyle = { background: cardBg, border: `1px solid ${border}`, borderRadius: 18, overflow: 'hidden' };
+
+    const buildActivity = () => {
+      const events = [];
+      repos.slice(0, 12).forEach((r) => {
+        events.push({ t: new Date(r.pushed_at).getTime(), title: `${r.name} updated`, sub: r.description || 'Repository pushed', time: this.timeAgo(r.pushed_at), dotStyle: dotFor(info) });
+      });
+      Object.entries(releasesByRepo).forEach(([full, rels]) => {
+        (rels || []).slice(0, 3).forEach((rel) => {
+          events.push({ t: new Date(rel.published_at || rel.created_at).getTime(), title: `${full.split('/')[1]} ${rel.tag_name}`, sub: 'Release published', time: this.timeAgo(rel.published_at || rel.created_at), dotStyle: dotFor(accent) });
+        });
+      });
+      events.sort((a, b) => b.t - a.t);
+      return events.map((e) => ({ ...e, rowStyle: rowBase }));
+    };
+    const fullActivity = s.username ? buildActivity() : [];
+
+    const segStyle = (active) => ({ padding: '7px 12px', borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: 'pointer', background: active ? accent : cardBg, color: active ? '#06210f' : inkMuted, border: `1px solid ${active ? accent : border}`, whiteSpace: 'nowrap' });
+    const segmentRowStyle = { display: 'flex', gap: 8, overflowX: 'auto', margin: '0 -18px', padding: '0 18px' };
+    const chipRowStyle = { display: 'flex', gap: 8, overflowX: 'auto', margin: '0 -18px', padding: '0 18px', flexWrap: 'wrap' };
+
+    const sortOptions = [
+      { key: 'trending', label: 'Trending' }, { key: 'stars', label: 'Stars' }, { key: 'forks', label: 'Forks' },
+      { key: 'recent', label: 'Recent' }, { key: 'issues', label: 'Issues' },
+    ].map((o) => ({ label: o.label, style: segStyle(s.repoSort === o.key), pick: () => this.setRepoSort(o.key) }));
+
+    const repoNameRowStyle = { display: 'flex', alignItems: 'center', gap: 8 };
+    const repoNameStyle = { fontSize: 15, fontWeight: 650, color: ink };
+    const trendingBadgeStyle = { fontSize: 10, fontWeight: 700, color: accent, background: accentSoft, padding: '2px 7px', borderRadius: 999, textTransform: 'uppercase', letterSpacing: 0.3 };
+    const repoDescStyle = { fontSize: 12.5, color: inkMuted, marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' };
+    const repoMetaRowStyle = { display: 'flex', gap: 12, marginTop: 6, flexWrap: 'wrap' };
+    const repoMetaItemStyle = { fontSize: 12, color: inkMuted, display: 'flex', alignItems: 'center', gap: 4 };
+    const chevronStyle = { fontSize: 20, color: inkFaint, flexShrink: 0 };
+    const repoRowActiveStyle = { background: cardBg2 };
+    const langColors = this.langColors();
+
+    const sortComparators = {
+      trending: (a, b) => this.trendScore(b, commitActivityByRepo) - this.trendScore(a, commitActivityByRepo),
+      stars: (a, b) => b.stargazers_count - a.stargazers_count,
+      forks: (a, b) => b.forks_count - a.forks_count,
+      recent: (a, b) => new Date(b.pushed_at) - new Date(a.pushed_at),
+      issues: (a, b) => b.open_issues_count - a.open_issues_count,
+    };
+    const sorted = [...repos].sort(sortComparators[s.repoSort] || sortComparators.trending);
+    const topFullName = sorted[0] && sorted[0].full_name;
+    const sortedRepos = sorted.map((r) => ({
+      name: r.name, description: r.description || 'No description', language: r.language,
+      starsFmt: this.fmt(r.stargazers_count), forksFmt: this.fmt(r.forks_count), issuesFmt: `${this.fmt(r.open_issues_count)} iss+PR`,
+      isTop: r.full_name === topFullName,
+      langDotStyle: { display: 'inline-block', width: 8, height: 8, borderRadius: 999, background: langColors[r.language] || inkFaint, marginRight: 4 },
+      rowStyle: clickableRowStyle, open: () => this.openRepo(r.full_name),
+    }));
+
+    const rangeOptions = [
+      { key: '7d', label: '7D' }, { key: '30d', label: '30D' }, { key: '90d', label: '90D' }, { key: '1y', label: '1Y' }, { key: 'all', label: 'All' },
+    ].map((o) => ({ label: o.label, style: segStyle(s.timeRange === o.key), pick: () => this.setTimeRange(o.key) }));
+    const weeksFor = { '7d': 1, '30d': 4, '90d': 13, '1y': 52, all: 52 }[s.timeRange] || 13;
+
+    const chartRepoOptions = [{ key: 'all', label: 'All Repos' }, ...topRepos.map((r) => ({ key: r.full_name, label: r.name }))]
+      .map((o) => ({ label: o.label, style: segStyle(s.chartRepo === o.key), pick: () => this.setChartRepo(o.key) }));
+
+    const buildSeries = (chartRepo) => {
+      let series = [];
+      let available = true;
+      if (chartRepo === 'all') {
+        const arrs = Object.values(commitActivityByRepo).filter((a) => Array.isArray(a) && a.length);
+        available = arrs.length > 0;
+        const len = arrs.reduce((m, a) => Math.max(m, a.length), 0);
+        for (let i = 0; i < len; i++) series.push(arrs.reduce((sum, a) => sum + (a[i] ? a[i].total : 0), 0));
+      } else {
+        const raw = commitActivityByRepo[chartRepo];
+        available = Array.isArray(raw) && raw.length > 0;
+        series = available ? raw.map((w) => w.total || 0) : [];
+      }
+      return { series, available };
+    };
+    const { series, available: chartAvailable } = buildSeries(s.chartRepo);
+    const shown = series.slice(-weeksFor);
+    const prevShown = series.slice(-weeksFor * 2, -weeksFor);
+    const total = shown.reduce((a, v) => a + v, 0);
+    const prevTotal = prevShown.reduce((a, v) => a + v, 0);
+    const avg = shown.length ? Math.round(total / shown.length) : 0;
+    const deltaPct = prevTotal > 0 ? Math.round(((total - prevTotal) / prevTotal) * 100) : null;
+    const max = Math.max(1, ...shown);
+    const chartBars = shown.map((v) => ({
+      wrapStyle: { flex: 1, height: 64, display: 'flex', alignItems: 'flex-end' },
+      barStyle: { width: '100%', height: `${Math.max(6, (v / max) * 100)}%`, background: accent, borderRadius: 3, opacity: v === 0 ? 0.25 : 1 },
+    }));
+    const chartStats = {
+      total: this.fmt(total), avg: this.fmt(avg),
+      deltaLabel: deltaPct == null ? '—' : `${deltaPct > 0 ? '+' : ''}${deltaPct}%`,
+      deltaStyle: { fontSize: 20, fontWeight: 700, color: deltaPct == null ? inkMuted : deltaPct >= 0 ? accent : danger },
+    };
+    const chartStatsRowStyle = { display: 'flex', gap: 24 };
+    const chartStatValueStyle = { fontSize: 20, fontWeight: 700, color: ink };
+    const chartCardStyle = { background: cardBg, border: `1px solid ${border}`, borderRadius: 18, padding: 16, display: 'flex', flexDirection: 'column', gap: 14 };
+    const barsRowStyle = { display: 'flex', gap: 3, height: 64, alignItems: 'flex-end' };
+    const chartFootStyle = { fontSize: 11.5, color: inkFaint };
+
+    const chartUnavailableStyle = { padding: '20px 4px', fontSize: 13, color: inkMuted, textAlign: 'center' };
+
+    const lastUpdatedLabel = s.lastUpdated ? `Updated ${this.timeAgo(new Date(s.lastUpdated).toISOString())}${s.stale ? ' (cached)' : ''}` : '';
+    const statusBarStyle = { fontSize: 11.5, color: s.stale || s.rateLimitNote ? amber : inkFaint, padding: '0 18px 10px' };
+    const statusBarText = s.rateLimitNote ? `${s.rateLimitNote}${lastUpdatedLabel ? ' · ' + lastUpdatedLabel : ''}` : lastUpdatedLabel;
+    const showStatusBar = !!statusBarText;
+
+    const lockedCardStyle = { background: dark ? 'oklch(0.24 0.01 250 / 0.6)' : 'oklch(0.94 0.006 250)', border: `1px dashed ${border}`, borderRadius: 18, padding: 16, display: 'flex', flexDirection: 'column', gap: 8 };
+    const lockedTitleRowStyle = { display: 'flex', alignItems: 'center', gap: 8 };
+    const lockGlyphStyle = { fontSize: 15, color: inkMuted };
+    const lockedBodyStyle = { fontSize: 13, color: inkMuted, lineHeight: 1.5 };
+
+    const tabDefs = [
+      { key: 'briefing', label: 'Briefing', glyph: '◆' }, { key: 'projects', label: 'Projects', glyph: '▤' },
+      { key: 'activity', label: 'Activity', glyph: '◉' }, { key: 'growth', label: 'Growth', glyph: '▲' },
+      { key: 'owner', label: 'Owner', glyph: '⚿' }, { key: 'profile', label: 'Profile', glyph: '●' },
+    ];
+    const tabBarStyle = { display: 'flex', borderTop: `0.5px solid ${border}`, background: cardBg, padding: `8px 4px calc(${safeBottom} + 10px)` };
+    const tabItems = tabDefs.map((t) => ({
+      label: t.label, glyph: t.glyph,
+      wrapStyle: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '4px 0', cursor: 'pointer', minHeight: 44 },
+      iconStyle: { fontSize: 15, color: s.tab === t.key ? accent : inkFaint },
+      labelStyle: { fontSize: 10, fontWeight: 600, color: s.tab === t.key ? accent : inkFaint },
+      pick: () => this.setTab(t.key),
+    }));
+
+    const overlayStyle = { position: 'absolute', inset: 0, background: bg, zIndex: 40, display: 'flex', flexDirection: 'column' };
+    const overlayScrollStyle = { flex: 1, overflow: 'auto', padding: `0 18px calc(${safeBottom} + 20px)`, display: 'flex', flexDirection: 'column', gap: 18 };
+    const overlayHeaderStyle = { padding: `calc(${safeTop} + 10px) 0 4px` };
+    const detailTitleWrapStyle = { display: 'flex', flexDirection: 'column', gap: 8 };
+    const detailNameStyle = { fontSize: 24, fontWeight: 700, color: ink, letterSpacing: -0.4 };
+    const detailOwnerStyle = { fontSize: 13, color: inkFaint };
+    const metaChipStyle = { fontSize: 12, color: inkMuted, background: cardBg2, padding: '5px 11px', borderRadius: 999, border: `1px solid ${border}` };
+    const statGrid2Style = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 };
+    const gridCellStyle = { background: cardBg, border: `1px solid ${border}`, borderRadius: 14, padding: '12px 14px' };
+    const gridValueStyle = { fontSize: 20, fontWeight: 700, color: ink, marginTop: 2 };
+    const releaseRowStyle = { display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px' };
+    const commitRowStyle = { padding: '10px 16px', borderBottom: `0.5px solid ${border}` };
+    const commitMsgStyle = { fontSize: 13.5, color: ink, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' };
+    const contributorRowStyle = { display: 'flex', flexWrap: 'wrap' };
+    const contributorAvatarStyle = { width: 36, height: 36, borderRadius: 999, border: `2px solid ${bg}`, marginRight: -10, objectFit: 'cover' };
+    const factorRowStyle = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 16px', borderBottom: `0.5px solid ${border}` };
+    const factorValueStyle = { fontSize: 12, color: inkFaint, textAlign: 'right', flexShrink: 0 };
+    const ghLinkStyle = { fontSize: 13.5, color: info, fontWeight: 600, textDecoration: 'none', textAlign: 'center', padding: '10px 0' };
+
+    const profileHeaderStyle = { display: 'flex', alignItems: 'center', gap: 14 };
+    const profileAvatarStyle = { width: 56, height: 56, borderRadius: 999, objectFit: 'cover', border: `1px solid ${border}` };
+    const totalStarsFmt = this.fmt(totalStars);
+    const exportRowStyle = { display: 'flex', gap: 8 };
+    const exportBtnStyle = { flex: 1, height: 44, borderRadius: 12, background: cardBg, color: ink, fontSize: 13.5, fontWeight: 600, border: `1px solid ${border}`, fontFamily: font, cursor: 'pointer' };
+
+    // OWNER MODE
+    const ownerSignedOutStyle = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '40px 20px', textAlign: 'center' };
+    const ownerHeadStyle = { fontSize: 18, fontWeight: 700, color: ink };
+    const ownerBodyStyle = { fontSize: 13.5, color: inkMuted, lineHeight: 1.5, maxWidth: 280 };
+    const permList = ['Metadata (read)', 'Contents (read)', 'Issues (read)', 'Pull requests (read)', 'Actions (read)', 'Administration (read) — required by GitHub for traffic analytics only'];
+    const ownerPermChipRowStyle = { display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center' };
+    const ownerPermChips = permList.map((p) => ({ label: p, style: metaChipStyle }));
+
+    const ownerRepoOptions = (s.ownerRepos || []).map((r) => ({
+      label: r.name, style: segStyle(s.ownerSelectedRepo === r.full_name), pick: () => this.loadOwnerTraffic(r.full_name),
+    }));
+
+    const trafficRows = [];
+    if (s.ownerTraffic && s.ownerTraffic.data) {
+      const d = s.ownerTraffic.data;
+      const sum = (obj, key) => (obj && Array.isArray(obj[key])) ? obj[key].reduce((a, x) => a + (x.count || 0), 0) : null;
+      trafficRows.push({ label: 'Views (14d)', value: d.views && !d.views.unavailable ? this.fmt(sum(d.views, 'views') ?? d.views.count) : 'temporarily unavailable' });
+      trafficRows.push({ label: 'Unique visitors', value: d.views && !d.views.unavailable ? this.fmt(d.views.uniques) : 'temporarily unavailable' });
+      trafficRows.push({ label: 'Clones (14d)', value: d.clones && !d.clones.unavailable ? this.fmt(sum(d.clones, 'clones') ?? d.clones.count) : 'temporarily unavailable' });
+      trafficRows.push({ label: 'Unique cloners', value: d.clones && !d.clones.unavailable ? this.fmt(d.clones.uniques) : 'temporarily unavailable' });
+    }
+    const topReferrers = (s.ownerTraffic && s.ownerTraffic.data && Array.isArray(s.ownerTraffic.data['popular/referrers'])) ? s.ownerTraffic.data['popular/referrers'].slice(0, 5) : [];
+    const popularPaths = (s.ownerTraffic && s.ownerTraffic.data && Array.isArray(s.ownerTraffic.data['popular/paths'])) ? s.ownerTraffic.data['popular/paths'].slice(0, 5) : [];
+
+    const ownerIssueLists = [
+      { title: 'Assigned Issues', items: (s.ownerIssuesData && s.ownerIssuesData.assignedIssues) || [] },
+      { title: 'Requested Reviews', items: (s.ownerIssuesData && s.ownerIssuesData.requestedReviews) || [] },
+      { title: 'Your Open Pull Requests', items: (s.ownerIssuesData && s.ownerIssuesData.authoredOpenPRs) || [] },
+    ];
+    const ownerActionRuns = (s.ownerActionsData && s.ownerActionsData.runs) || [];
+    const ownerSyncLabel = s.ownerSyncedAt ? `Last synced ${this.timeAgo(new Date(s.ownerSyncedAt).toISOString())}` : '';
+
+    let selectedRepoData = null;
+    const selRepo = repos.find((r) => r.full_name === s.selectedRepoName);
+    if (selRepo) {
+      const rels = releasesByRepo[selRepo.full_name] || [];
+      const latest = rels[0];
+      const downloads = latest ? (latest.assets || []).reduce((a, x) => a + (x.download_count || 0), 0) : 0;
+      const ca = commitActivityByRepo[selRepo.full_name] || [];
+      const maxCa = Math.max(1, ...ca.map((w) => w.total || 0));
+      const commits = s.commitsByRepo[selRepo.full_name] || [];
+      const health = this.healthScore(selRepo, commitActivityByRepo, releasesByRepo);
+      const trends = [];
+      const days = this.daysSince(selRepo.pushed_at);
+      if (days > 14) trends.push({ text: `No activity for ${Math.floor(days)} days.`, dotStyle: dotFor(amber) });
+      else trends.push({ text: `Active — last push ${this.timeAgo(selRepo.pushed_at)}.`, dotStyle: dotFor(accent) });
+      if (selRepo.open_issues_count / Math.max(selRepo.stargazers_count, 1) > 0.15 && selRepo.open_issues_count >= 5) trends.push({ text: `Issue count is high relative to stars (${selRepo.open_issues_count} vs ${selRepo.stargazers_count}).`, dotStyle: dotFor(danger) });
+      if (selRepo.stargazers_count > 10 && rels.length === 0) trends.push({ text: 'Has stars but no published release.', dotStyle: dotFor(amber) });
+      if (!trends.length) trends.push({ text: 'No notable trends detected.', dotStyle: dotFor(inkFaint) });
+
+      const subs = (s.subscribersByRepo || {})[selRepo.full_name];
+      selectedRepoData = {
+        name: selRepo.name, full_name: selRepo.full_name, description: selRepo.description || 'No description', htmlUrl: selRepo.html_url,
+        chips: [selRepo.language, selRepo.license ? selRepo.license.spdx_id : null, selRepo.default_branch].filter(Boolean),
+        grid: [
+          { label: 'Stars', value: this.fmt(selRepo.stargazers_count) }, { label: 'Forks', value: this.fmt(selRepo.forks_count) },
+          { label: 'Watching', value: subs == null ? '—' : this.fmt(subs) }, { label: 'Issues + PRs', value: this.fmt(selRepo.open_issues_count) },
+        ],
+        health,
+        trends,
+        latestRelease: latest ? { tag: latest.tag_name, date: this.timeAgo(latest.published_at), downloads: this.fmt(downloads) } : { tag: 'No releases yet', date: '', downloads: '' },
+        sparkline: ca.map((w) => ({
+          wrapStyle: { flex: 1, height: 64, display: 'flex', alignItems: 'flex-end' },
+          barStyle: { width: '100%', height: `${Math.max(6, ((w.total || 0) / maxCa) * 100)}%`, background: accent, borderRadius: 2, opacity: (w.total || 0) === 0 ? 0.25 : 1 },
+        })),
+        commits: commits.map((c) => ({ message: (c.commit && c.commit.message ? c.commit.message.split('\n')[0] : ''), meta: `${c.commit && c.commit.author ? c.commit.author.name : ''} · ${this.timeAgo(c.commit && c.commit.author && c.commit.author.date)}` })),
+        commitsLoading: s.detailLoading && commits.length === 0,
+        contributors: s.contributorsByRepo[selRepo.full_name] || [],
+      };
+    }
+
+    return {
+      dark, isOnboarding: s.screen === 'onboarding', isApp: s.screen === 'app',
+      rootStyle, onboardStyle, logoRingStyle, logoDotStyle, wordmarkStyle, taglineStyle,
+      usernameInput: s.usernameInput, onUsernameChange: this.onUsernameChange, inputStyle,
+      error: s.error, errorTextStyle, submitUsername: this.submitUsername, primaryBtnStyle, primaryBtnActiveStyle, secondaryBtnStyle,
+      submitLabel: s.loading ? 'Loading…' : 'View Pulse',
+      demoRowStyle, demoChipStyle, demoChipActiveStyle, onboardFootStyle,
+      demoUsers: ['sindresorhus', 'gaearon', 'torvalds'].map((n) => ({ name: n, pick: () => this.pickDemo(n) })),
+      appShellStyle, headerStyle, headerDotStyle, headerTitleStyle, headerLabel,
+      iconBtnStyle, iconBtnActiveStyle,
+      refresh: this.refresh, refreshGlyph: '↻', toggleTheme: this.toggleTheme, themeGlyph: dark ? '☾' : '☀', changeUser: this.changeUser,
+      user, scrollAreaStyle, sectionGapStyle,
+      isBriefingTab: s.tab === 'briefing', isProjectsTab: s.tab === 'projects', isActivityTab: s.tab === 'activity', isGrowthTab: s.tab === 'growth', isProfileTab: s.tab === 'profile',
+      greeting, greetingStyle, greetingSub, greetingSubStyle,
+      healthCardStyle, healthRowStyle, statLabelStyle, healthScoreStyle, healthRingWrapStyle, overallHealth, statSubStyle,
+      blockHeaderRowStyle, blockHeaderStyle, listCardStyle,
+      todayChanges, noTodayChanges, needsAttention, noNeedsAttention, opportunities, noOpportunities,
+      activityTitleStyle, activitySubStyle, activityTimeStyle, emptyRowStyle, whyStyle,
+      topRepoCard, topRepoCardStyle, repoNameStyle, repoDescStyle, chevronStyle,
+      showStatusBar, statusBarText, statusBarStyle, chartAvailable, chartUnavailable: !chartAvailable, chartUnavailableStyle,
+      segmentRowStyle, chipRowStyle, sortOptions, repoNameRowStyle, trendingBadgeStyle,
+      repoMetaRowStyle, repoMetaItemStyle, repoRowActiveStyle, sortedRepos,
+      fullActivity,
+      rangeOptions, chartRepoOptions, chartCardStyle, chartStatsRowStyle, chartStatValueStyle, chartStats,
+      barsRowStyle, chartBars, chartFootStyle, lockedCardStyle, lockedTitleRowStyle, lockGlyphStyle, lockedBodyStyle,
+      profileHeaderStyle, profileAvatarStyle, statGrid2Style, gridCellStyle, gridValueStyle, totalStarsFmt, ghLinkStyle,
+      exportRowStyle, exportBtnStyle, exportJSON: this.exportJSON, exportMarkdown: this.exportMarkdown,
+      tabBarStyle, tabItems,
+      isOwnerTab: s.tab === 'owner',
+      ownerChecked: s.ownerChecked, ownerAuthed: s.ownerAuthed, ownerNotAuthed: s.ownerChecked && !s.ownerAuthed,
+      ownerAuthReasonIsExpired: s.ownerAuthReason === 'expired_authentication',
+      ownerSignedOutStyle, ownerHeadStyle, ownerBodyStyle, ownerPermChipRowStyle, ownerPermChips,
+      signInOwner: this.signInOwner, signOutOwner: this.signOutOwner,
+      ownerProfile: s.ownerProfile || {}, ownerSyncLabel, ownerLoading: s.ownerLoading,
+      ownerRepoOptions, hasOwnerRepos: (s.ownerRepos || []).length > 0,
+      trafficRows, hasTrafficRows: trafficRows.length > 0, topReferrers, hasTopReferrers: topReferrers.length > 0,
+      popularPaths, hasPopularPaths: popularPaths.length > 0,
+      ownerIssueLists, ownerActionRuns, hasOwnerActionRuns: ownerActionRuns.length > 0,
+      isRepoDetailOpen: !!selectedRepoData, selectedRepoData: selectedRepoData || {}, closeRepo: this.closeRepo,
+      overlayStyle, overlayScrollStyle, overlayHeaderStyle, detailTitleWrapStyle, detailNameStyle, detailOwnerStyle,
+      metaChipStyle, healthScoreSmallStyle, factorRowStyle, factorValueStyle, ev2RowStyle,
+      commitRowStyle, commitMsgStyle, contributorRowStyle, contributorAvatarStyle, releaseRowStyle,
+    };
+  }
+
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem(LS_KEY); } catch (e) {}
+    if (saved) { this.setState({ usernameInput: saved }); this.loadDashboard(saved); }
+    this.checkOwnerSession();
+  }
+}
+
+</script>
+</body>
+</html>
