@@ -1,0 +1,15 @@
+:root{
+  --font:-apple-system,'SF Pro Text',system-ui,sans-serif;
+  --accent:oklch(0.72 0.19 145);
+  --danger:oklch(0.65 0.18 30);
+  --amber:oklch(0.78 0.14 80);
+  --info:oklch(0.68 0.14 250);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overscroll-behavior:none;font-family:var(--font)}
+#app{position:fixed;inset:0;width:100vw;height:100dvh;overflow:hidden}
+::-webkit-scrollbar{display:none}
+button,input{font-family:var(--font)}
+a{text-decoration:none}
+@keyframes fade-up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.card{animation:fade-up .4s ease}
