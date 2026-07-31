@@ -6,10 +6,21 @@
   --info:oklch(0.68 0.14 250);
 }
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;overscroll-behavior:none;font-family:var(--font)}
+html,body{margin:0;height:100%;overscroll-behavior:none;font-family:var(--font);-webkit-text-size-adjust:100%;text-rendering:optimizeLegibility}
+body{-webkit-tap-highlight-color:transparent}
 #app{position:fixed;inset:0;width:100vw;height:100dvh;overflow:hidden}
 ::-webkit-scrollbar{display:none}
 button,input{font-family:var(--font)}
+button,[role="button"],a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button:active,[role="button"]:active,a:active{transform:scale(.985)}
+button:focus-visible,[role="button"]:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 65%,transparent);outline-offset:3px}
 a{text-decoration:none}
+img{display:block;max-width:100%}
 @keyframes fade-up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.card{animation:fade-up .4s ease}
+@keyframes pulse-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.card{animation:fade-up .32s ease both;transform-origin:center}
+.card:nth-child(2){animation-delay:.025s}.card:nth-child(3){animation-delay:.05s}.card:nth-child(4){animation-delay:.075s}
+[aria-busy="true"],.skeleton{background:linear-gradient(90deg,rgba(127,127,127,.08),rgba(127,127,127,.18),rgba(127,127,127,.08));background-size:200% 100%;animation:pulse-shimmer 1.35s linear infinite;border-radius:14px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}button:active,[role="button"]:active,a:active{transform:none}}
+@media (max-width:430px){.card{animation-duration:.26s}button,[role="button"]{min-height:44px}}
+@supports(padding:max(0px)){body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}}
